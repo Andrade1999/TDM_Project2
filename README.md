@@ -13,4 +13,4 @@ You should modify in the script the order of the model of each patient according
 a .txt file for each patient with their RMSE, performance (RMSE times 400, in mg/dl), sensitiviy and specificity. You also have a .txt file with the arrays with all of the RMSE,
 performance, sensitivy and specificity results plus the average of each metric. <br />
 WARNING: The script for all the patients takes a long time to run (5 or 6 hours). This is mostly due to the patients with big p and q values, with increase the running time of the 
-code a lot. This is because their timeseries are not differenced.
+code a lot. This is because their timeseries are not differenced. Alternatively you can comment out the loop for every patient and assign x to whatever patient you want to model.
