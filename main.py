@@ -165,98 +165,98 @@ if __name__ == "__main__":
     #how much do we want to look into the future
     prediction_horizon = 6 #30 minutes
     #create path for results
-    if (os.path.isdir("Plot" + str(prediction_horizon)) == False):
-        os.mkdir("Plot" + str(prediction_horizon))
+    if (os.path.isdir("Results" + str(prediction_horizon)) == False):
+        os.mkdir("Results" + str(prediction_horizon))
        
     #for each patient    
-    #for x in range(len(testpaths)):
-    x = 4
-    odr = order[x] #order of the patient
-    lookback = odr[0] #lags we are using as predictors (p parameter)
-    textfile = open("Plot" + str(prediction_horizon) + "/Results" + str(x) + ".txt", "w")
-    textfile.write("\nResults Patient" + str(x) + "\n")
-    print("Start Model")
-    history = [i for i in train[x][-200:]] #fill in array for training with last 200 observations (around 17 hours)
-    history.extend([i for i in test[x][:lookback]]) #insert the observations we are using has predictors
-    test[x] = test[x][lookback:] #remove predictors from test set
-    predictions = []
-    targets = []
-    #for size of test (moves the window forward)
-    for i in range(np.size(test[x]) - prediction_horizon):
-        incr_history = history.copy()
-        #for each observation we want to predict
-        for j in range(prediction_horizon):
-            incr_predictions = []
-            #train the model
-            model = ARIMA(incr_history, order = odr)
-            #fit the model
-            model_fit = model.fit()
-            print("Out of Sample Forecast x:" + str(x) + " i:" + str(i) + " j:" + str(j))
-            #predict the next observation
-            output = model_fit.forecast()
-            otp = output[0]
-            #add prediction to prediction array and to history
-            incr_predictions.append(otp)
-            incr_history.append(otp)
-            #move the window forward 1
-            incr_history = incr_history[1:]
-            
-        predictions.append(incr_predictions[-1])
-        targets.append(test[x][i + prediction_horizon - 1])  
-        history.append(test[x][i])
-        history = history[1:]
-    
-    #Root Mean Square Error
-    RMSE = sqrt(mean_squared_error(targets*400, predictions*400))
-    #Error in mg/dl (as in literature)
-    Performance = RMSE*400
-    print('Test RMSE P: %.3f' % RMSE)
-    #Write results
-    textfile.write("RSME: " + str(RMSE) + "\n")
-    textfile.write("Performance: " + str(Performance) + "\n")
-    
-    #Save observations plot
-    pyplot.close()
-    line1, = pyplot.plot(targets)
-    line2, = pyplot.plot(predictions, color = 'red')
-    pyplot.xlabel("Time Steps")
-    pyplot.ylabel("Normalized Blood Glucose (mg/dl)")
-    pyplot.legend([line1, line2], ['Targets', 'Predictions'])
-    pyplot.title("Blood glucose prediction vs Training Set")
-    pyplot.savefig("Plots" + str(prediction_horizon)  + "/patient_" + str(x) +  '.png')
-    
-    gt_event_masks = get_hypo_event(targets, threshold=threshold)
-    pred_event_mask = get_hypo_event(predictions, threshold=threshold)
-    
-    #Save event plot
-    pyplot.close()
-    pyplot.plot(gt_event_masks)
-    pyplot.plot(pred_event_mask, color = 'red')
-    pyplot.xlabel("Time Steps")
-    pyplot.ylabel("Event")
-    pyplot.legend()
-    pyplot.title("Event prediction vs Training Set")
-    pyplot.savefig("Plot" + str(prediction_horizon)  + "/patient_event" + str(x) +  '.png')
-    
-    #Check if we have a hypo event in the ground truth
-    if np.max(gt_event_masks) == 1:
-        sensitivity, specificity = metrics(gt_event_masks, pred_event_mask)
-        print('sensitivity P: {}\nspecificity P: {}'.format(sensitivity, specificity))
-        textfile.write("Sensitivity_P: " + str(sensitivity) + "\nSpecificity_P: " + str(specificity) + "\n")
-        r_sensitivity.append(sensitivity)
-        r_specificity.append(specificity)
-    else:
-        print('patient did not have any phase in GT below {}mg/dl'.format(threshold))
-        textfile.write("Sensitivity_P: NA, Specificity_P: NA\n")
-        r_specificity.append('NA')
-        r_sensitivity.append('NA')
+    for x in range(len(testpaths)):
+        odr = order[x] #order of the patient
+        lookback = odr[0] #lags we are using as predictors (p parameter)
+        textfile = open("Results" + str(prediction_horizon) + "/Results" + str(x) + ".txt", "w")
+        textfile.write("\nResults Patient" + str(x) + "\n")
+        print("Start Model")
+        history = [i for i in train[x][-200:]] #fill in array for training with last 200 observations (around 17 hours)
+        history.extend([i for i in test[x][:lookback]]) #insert the observations we are using has predictors
+        test[x] = test[x][lookback:] #remove predictors from test set
+        predictions = []
+        targets = []
+        #for size of test (moves the window forward)
+        for i in range(np.size(test[x]) - prediction_horizon):
+            incr_history = history.copy()
+            #for each observation we want to predict
+            for j in range(prediction_horizon):
+                incr_predictions = []
+                #train the model
+                model = ARIMA(incr_history, order = odr)
+                #fit the model
+                model_fit = model.fit()
+                print("Out of Sample Forecast x:" + str(x) + " i:" + str(i) + " j:" + str(j))
+                #predict the next observation
+                output = model_fit.forecast()
+                otp = output[0]
+                #add prediction to prediction array and to history
+                incr_predictions.append(otp)
+                incr_history.append(otp)
+                #move the window forward 1
+                incr_history = incr_history[1:]
+                
+            predictions.append(incr_predictions[-1])
+            targets.append(test[x][i + prediction_horizon - 1])  
+            history.append(test[x][i])
+            history = history[1:]
         
-    textfile.close()
-    r_RMSE.append(RMSE)
-    r_performance.append(Performance)
+        #Root Mean Square Error
+        RMSE = sqrt(mean_squared_error(targets*400, predictions*400))
+        #Error in mg/dl (as in literature)
+        Performance = RMSE*400
+        print('Test RMSE P: %.3f' % RMSE)
+        #Write results
+        textfile.write("RSME: " + str(RMSE) + "\n")
+        textfile.write("Performance: " + str(Performance) + "\n")
+        
+        #Save observations plot
+        pyplot.close()
+        line1, = pyplot.plot(targets)
+        line2, = pyplot.plot(predictions, color = 'red')
+        pyplot.xlabel("Time Steps")
+        pyplot.ylabel("Normalized Blood Glucose (mg/dl)")
+        pyplot.legend([line1, line2], ['Targets', 'Predictions'])
+        pyplot.title("Blood glucose prediction vs Training Set")
+        pyplot.savefig("Results" + str(prediction_horizon)  + "/patient_" + str(x) +  '.png')
+        
+        gt_event_masks = get_hypo_event(targets, threshold=threshold)
+        pred_event_mask = get_hypo_event(predictions, threshold=threshold)
+        
+        #Save event plot
+        pyplot.close()
+        pyplot.plot(gt_event_masks)
+        pyplot.plot(pred_event_mask, color = 'red')
+        pyplot.xlabel("Time Steps")
+        pyplot.ylabel("Event")
+        pyplot.legend()
+        pyplot.title("Event prediction vs Training Set")
+        pyplot.show()
+        pyplot.savefig("Results" + str(prediction_horizon)  + "/patient_event" + str(x) +  '.png')
+        
+        #Check if we have a hypo event in the ground truth
+        if np.max(gt_event_masks) == 1:
+            sensitivity, specificity = metrics(gt_event_masks, pred_event_mask)
+            print('sensitivity P: {}\nspecificity P: {}'.format(sensitivity, specificity))
+            textfile.write("Sensitivity_P: " + str(sensitivity) + "\nSpecificity_P: " + str(specificity) + "\n")
+            r_sensitivity.append(sensitivity)
+            r_specificity.append(specificity)
+        else:
+            print('patient did not have any phase in GT below {}mg/dl'.format(threshold))
+            textfile.write("Sensitivity_P: NA, Specificity_P: NA\n")
+            r_specificity.append('NA')
+            r_sensitivity.append('NA')
+            
+        textfile.close()
+        r_RMSE.append(RMSE)
+        r_performance.append(Performance)
         
     #Write final results to a txt
-    textfile = open("Plot" + str(prediction_horizon) + "/Results.txt", "w")
+    textfile = open("Results" + str(prediction_horizon) + "/Results.txt", "w")
     textfile.write("\nSensitivity Array: " + str(r_sensitivity) + "\n")
     textfile.write("Specificity Array: " + str(r_specificity) + "\n")
     textfile.write("RMSE Array: " + str(r_RMSE) + "\n")
