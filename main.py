@@ -226,18 +226,7 @@ if __name__ == "__main__":
         
         gt_event_masks = get_hypo_event(targets, threshold=threshold)
         pred_event_mask = get_hypo_event(predictions, threshold=threshold)
-        
-        #Save event plot
-        pyplot.close()
-        pyplot.plot(gt_event_masks)
-        pyplot.plot(pred_event_mask, color = 'red')
-        pyplot.xlabel("Time Steps")
-        pyplot.ylabel("Event")
-        pyplot.legend()
-        pyplot.title("Event prediction vs Training Set")
-        pyplot.show()
-        pyplot.savefig("Results" + str(prediction_horizon)  + "/patient_event" + str(x) +  '.png')
-        
+           
         #Check if we have a hypo event in the ground truth
         if np.max(gt_event_masks) == 1:
             sensitivity, specificity = metrics(gt_event_masks, pred_event_mask)
