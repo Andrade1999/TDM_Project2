@@ -65,12 +65,13 @@ if __name__ == "__main__":
         
         #Check if stationary (p value > 0.05)
         statresulttrain = adfuller(trainp)
-        textfile.write("Dif Train 1 :" + str(statresulttrain[0]) + "Dif Train 2: " + str(statresulttrain[1]) + "\n")
+        textfile.write("ADFuller1: " + str(statresulttrain[0]) + "p-value1: " + str(statresulttrain[1]) + "\n")
         
         if (statresulttrain[1] > 0.05): #95% confidence interval
             trainp_dif = pd.DataFrame(trainp, columns=['value'])
             trainp = trainp_dif.value.diff().dropna() #differentiate tieme series
             statresulttrain = adfuller(trainp)
+            textfile.write("ADFuller2: " + str(statresulttrain[0]) + "p-value2: " + str(statresulttrain[1]) + "\n")
             #test for second order of differentation
             if (statresulttrain[1] > 0.05):
                 trainp = trainp_dif.value.diff().dropna()
